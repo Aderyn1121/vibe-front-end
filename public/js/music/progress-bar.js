@@ -67,7 +67,11 @@ progressCircle.onmousedown = function (event) {
     const percent = newLeft / 329;
     track.audio.currentTime = Math.floor(percent * track.audio.duration);
     // track.audio.currentTime = track.audio
-    setInterval(updateTime, 1000);
+
+    if (interval) {
+      clearInterval(interval);
+    }
+    interval = setInterval(updateTime, 1000);
 
     document.removeEventListener('mouseup', onMouseUp);
     document.removeEventListener('mousemove', onMouseMove);

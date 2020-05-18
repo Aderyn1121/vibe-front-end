@@ -13,6 +13,9 @@ function playMusic() {
   track.audio.play();
   playButton.innerHTML = '<i class="fas fa-pause"></i>';
   track.audio.classList.add('playing');
+  if (interval) {
+    clearInterval(interval)
+  }
   interval = setInterval(updateTime, 1000);
 }
 
@@ -21,7 +24,6 @@ function startMusic(songInQueue) {
   track.art.innerHTML = `<img src='../../public/images/album-art/${songInQueue.id}.jpg' >`;
   track.title.innerHTML = songInQueue.title;
   track.artist.innerHTML = songInQueue.artist;
-
   playMusic();
 }
 
