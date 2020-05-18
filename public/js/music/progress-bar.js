@@ -39,20 +39,17 @@ function updateTime() {
   }
   progressCircle.style['left'] = `${percent * 94.25}%`;
 }
-let interval = setInterval(updateTime, 1000);
 
 progressCircle.onmousedown = function (event) {
   clearInterval(interval);
+  let newLeft;
   event.preventDefault(); // prevent selection start (browser action)
 
   let shiftX = event.clientX - progressCircle.getBoundingClientRect().left;
   // shiftY not needed, the progressCircle moves only horizontally
 
-  document.addEventListener('mousemove', onMouseMove);
-  document.addEventListener('mouseup', onMouseUp);
-
   function onMouseMove(event) {
-    let newLeft = event.clientX - shiftX - bar.getBoundingClientRect().left;
+    newLeft = event.clientX - shiftX - bar.getBoundingClientRect().left;
 
     // the pointer is out of bar => lock the progressCircle within the bounaries
     if (newLeft < 0) {
@@ -67,9 +64,17 @@ progressCircle.onmousedown = function (event) {
   }
 
   function onMouseUp() {
+    const percent = newLeft / 329;
+    track.audio.currentTime = Math.floor(percent * track.audio.duration);
+    // track.audio.currentTime = track.audio
+    setInterval(updateTime, 1000);
+
     document.removeEventListener('mouseup', onMouseUp);
     document.removeEventListener('mousemove', onMouseMove);
   }
+
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
 };
 
 progressCircle.ondragstart = function () {

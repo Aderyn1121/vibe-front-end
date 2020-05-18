@@ -4,7 +4,7 @@ const track = {
   artist: document.getElementById('trackArtist'),
   audio: document.getElementById('trackAudio'),
 };
-let stopObject;
+let interval;
 let songQueue = [];
 let currentTrack = 0;
 let repeat = 'none';
@@ -13,6 +13,7 @@ function playMusic() {
   track.audio.play();
   playButton.innerHTML = '<i class="fas fa-pause"></i>';
   track.audio.classList.add('playing');
+  interval = setInterval(updateTime, 1000);
 }
 
 function startMusic(songInQueue) {
@@ -23,6 +24,7 @@ function startMusic(songInQueue) {
 
   playMusic();
 }
+
 function pauseMusic() {
   track.audio.pause();
   playButton.innerHTML = '<i class="fas fa-play"></i>';
