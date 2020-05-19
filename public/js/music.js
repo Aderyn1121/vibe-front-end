@@ -14,7 +14,7 @@ function playMusic() {
   playButton.innerHTML = '<i class="fas fa-pause"></i>';
   track.audio.classList.add('playing');
   if (interval) {
-    clearInterval(interval)
+    clearInterval(interval);
   }
   interval = setInterval(updateTime, 1000);
 }

@@ -37,10 +37,11 @@ function updateTime() {
   } else {
     endTime.innerHTML = '00:00:00';
   }
-  progressCircle.style['left'] = `${percent * 94.25}%`;
+  progressCircle.style['left'] = `${percent * 96}%`;
 }
 
 progressCircle.onmousedown = function (event) {
+  if (!track.audio.src) return;
   clearInterval(interval);
   let newLeft;
   event.preventDefault(); // prevent selection start (browser action)
@@ -49,6 +50,7 @@ progressCircle.onmousedown = function (event) {
   // shiftY not needed, the progressCircle moves only horizontally
 
   function onMouseMove(event) {
+    if (!track.audio.src) return;
     newLeft = event.clientX - shiftX - bar.getBoundingClientRect().left;
 
     // the pointer is out of bar => lock the progressCircle within the bounaries
@@ -64,9 +66,9 @@ progressCircle.onmousedown = function (event) {
   }
 
   function onMouseUp() {
-    const percent = newLeft / 329;
+    if (!track.audio.src) return;
+    const percent = newLeft / (screen.width * 0.24084919);
     track.audio.currentTime = Math.floor(percent * track.audio.duration);
-    // track.audio.currentTime = track.audio
 
     if (interval) {
       clearInterval(interval);
