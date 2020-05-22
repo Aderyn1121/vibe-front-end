@@ -2,6 +2,8 @@
   #editPlaylistNav
     #editPlaylistName
       h1#editPlaylistTitle
+      form#editTitleForm.hidden
+        input(type='text' name="newPlaylistTitle")#editTitleInput
       #editIcon
         i(class="fas fa-edit")
     #editPlaylistButtons
@@ -15,11 +17,4 @@
         .trackAlbum Album
         .trackDelete
       #tableBody
-        //- .addSongs No songs found
-        #song1.song
-          .listsong Hide and Seek
-          .listsong Imogen Heap
-          .listsong Speak for Yourself
-          .delete
-            i(class="fas fa-trash")
-            i(class="fas fa-play")
+        .addSongs No songs found
