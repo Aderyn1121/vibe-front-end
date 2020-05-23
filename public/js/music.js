@@ -250,23 +250,42 @@ const updateSearchSection = (results, section) => {
     text.innerHTML = result.name;
     div.appendChild(img);
     div.appendChild(text);
+    div.addEventListener('click', async (event) => {
+      const songId = event.target.getAttribute('songsid');
+      const songJSON = await fetch(`${backendURL}/songs/${songId}`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('VIBE_TOKEN')}`,
+        },
+      });
+      const song = await songJSON.json();
+      console.log(song);
+
+      songQueue = [song];
+      startMusic(songQueue[0]);
+    });
     div.oncontextmenu = (event1) => {
       contextMenu.classList.remove('hidden');
       contextMenu.style.top = `${event1.pageY - 10}px`;
       contextMenu.style.left = `${event1.pageX - 10}px`;
 
-      contextMenu.addEventListener('mouseleave', (event2) => {
-        event2.stopPropagation;
-        contextMenu.classList.add('hidden');
-      });
-
-      contextPlaylists.addEventListener('click', (event3) => {
-        const playlistid = event3.target.getAttribute('playlistid');
-        const songid = event1.target.getAttribute('songsid');
-        //TODO ADD SONG TO PLAYLIST
-        console.log(playlistid, songid);
-        contextMenu.classList.add('hidden');
-      });
+      contextPlaylists.addEventListener(
+        'click',
+        async (event3) => {
+          const playlistId = event3.target.getAttribute('playlistid');
+          const songId = event1.target.getAttribute('songsid');
+          const body = { songId: songId };
+          await fetch(`${backendURL}/playlists/${playlistId}/songs`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${localStorage.getItem('VIBE_TOKEN')}`,
+            },
+            body: JSON.stringify(body),
+          });
+          contextMenu.classList.add('hidden');
+        },
+        { once: true }
+      );
       return false;
     };
 
@@ -292,7 +311,7 @@ const updateSearch = async () => {
 
   const { searchResults } = await resultsJSON.json();
 
-  // updateSearchSection(searchResults.matchedPlaylists, 'Playlists');
+  updateSearchSection(searchResults.matchedPlaylists, 'Playlists');
 
   updateSearchSection(searchResults.matchedArtist, 'Artists');
 
@@ -300,9 +319,9 @@ const updateSearch = async () => {
 
   updateSearchSection(searchResults.matchedAlbums, 'Albums');
 
-  // updateSearchSection(searchResults.matchedFriends, 'Friends');
+  updateSearchSection(searchResults.matchedFriends, 'Friends');
 
-  // updateSearchSection(searchResults.matchedUsers, 'Users');
+  updateSearchSection(searchResults.matchedUsers, 'Users');
 };
 
 //PLAYLIST FUNCTIONS
@@ -406,10 +425,26 @@ const editPlaylist = async (event) => {
   });
 };
 
+const deleteSongFromPlaylist = async (event) => {
+  console.log(event.target);
+  const songId = event.target.getAttribute('songid');
+  const playlistId = window.location.href.match(/\d+$/);
+  await fetch(`${backendURL}/playlists/${playlistId}/songs/${songId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem('VIBE_TOKEN')}`,
+    },
+  });
+  updateEditPlaylistsList(playlistId);
+};
+
 const updateEditPlaylistsList = async (playlistId) => {
   const songs = await getPlaylistSongs(playlistId);
-  if (songs.length === 0) return;
   const tableBody = document.getElementById('tableBody');
+  if (songs.length === 0) {
+    tableBody.innerHTML = '<div.addSongs>No songs found</div>';
+    return;
+  }
 
   tableBody.innerHTML = '';
   songs.forEach((song) => {
@@ -428,11 +463,14 @@ const updateEditPlaylistsList = async (playlistId) => {
     trackDiv.setAttribute('songId', song.songId);
     artistDiv.setAttribute('songId', song.artistId);
     albumDiv.setAttribute('songId', song.albumId);
+    deleteDiv.setAttribute('songId', song.songId);
 
     trackDiv.innerHTML = song.playlistSong;
     artistDiv.innerHTML = song.artistName;
     albumDiv.innerHTML = song.albumName;
-    deleteDiv.innerHTML = '<i class="fas fa-trash"></i>';
+    deleteDiv.innerHTML = `<i songId=${song.songId} class="fas fa-trash"></i>`;
+
+    deleteDiv.addEventListener('click', deleteSongFromPlaylist);
 
     songDiv.appendChild(trackDiv);
     songDiv.appendChild(artistDiv);
@@ -568,10 +606,6 @@ sidebarLinks.addEventListener('click', async (event) => {
   }
 });
 
-// sidebarPlaylists.addEventListener('click', async (event) => {
-//   playPlaylist();
-// });
-
 sidebarPlaylists.addEventListener('click', async (event) => {
   if (!event.target.getAttribute('playlistid')) return;
   const playlistId = event.target.getAttribute('playlistid');
@@ -614,4 +648,9 @@ plusIcon.addEventListener('click', () => {
     sidebarPlaylists.innerHTML = '';
     updatePlaylists();
   });
+});
+
+contextMenu.addEventListener('mouseleave', (event2) => {
+  event2.stopPropagation;
+  contextMenu.classList.add('hidden');
 });
