@@ -38,6 +38,9 @@ let newPLinput = document.getElementById('newPLinput');
 //PLAYER FUNCTIONS
 const playMusic = async () => {
   document.body.style.cursor = 'progress';
+  track.audio.muted = true;
+  await track.audio.play();
+  track.audio.muted = false;
   track.audio.volume = volume.value / 100;
   document.body.style.cursor = 'default';
   playButton.innerHTML = '<i class="fas fa-pause"></i>';
@@ -115,11 +118,6 @@ function prevTrack() {
 function updateTime(currentTime = Math.ceil(track.audio.currentTime)) {
   const duration = Math.floor(track.audio.duration) - currentTime;
   const percent = currentTime / track.audio.duration;
-
-  const hours =
-    Math.floor(currentTime / 3600) < 10
-      ? `0${Math.floor(currentTime / 3600)}`
-      : Math.floor(currentTime / 3600);
   const mins =
     Math.floor(currentTime / 60) < 10
       ? `0${Math.floor(currentTime / 60)}`
@@ -127,13 +125,9 @@ function updateTime(currentTime = Math.ceil(track.audio.currentTime)) {
   const seconds =
     currentTime % 60 < 10 ? `0${currentTime % 60}` : currentTime % 60;
 
-  startTime.innerHTML = `${hours}:${mins}:${seconds}`;
+  startTime.innerHTML = `${mins}:${seconds}`;
 
   if (duration) {
-    const durationHours =
-      Math.floor(duration / 3600) < 10
-        ? `0${Math.floor(duration / 3600)}`
-        : Math.floor(duration / 3600);
     const durationMins =
       Math.floor(duration / 60) < 10
         ? `0${Math.floor(duration / 60)}`
@@ -141,9 +135,9 @@ function updateTime(currentTime = Math.ceil(track.audio.currentTime)) {
     const durationSeconds =
       duration % 60 < 10 ? `0${duration % 60}` : duration % 60;
 
-    endTime.innerHTML = `${durationHours}:${durationMins}:${durationSeconds}`;
+    endTime.innerHTML = `${durationMins}:${durationSeconds}`;
   } else {
-    endTime.innerHTML = '00:00:00';
+    endTime.innerHTML = '00:00';
   }
   progressBar.value = Math.floor(percent * 100);
 }
@@ -314,13 +308,11 @@ const updateSearchSection = (results, section) => {
 
         await playClickedSong(e);
         playMusic();
-        track.audio.play();
       });
     } else if (section === 'playlist') {
       div.addEventListener('click', async (e) => {
         await playPlaylist(e);
         playMusic();
-        track.audio.play();
       });
     }
 
@@ -507,7 +499,6 @@ const updateEditPlaylistsList = async (playlistId) => {
     trackDiv.addEventListener('click', async (event) => {
       await playPlaylist(event, event.target.getAttribute('trackid'));
       playMusic();
-      track.audio.play();
     });
     trackCounter++;
 
@@ -536,7 +527,6 @@ const updateEditPlaylist = async (playlistId) => {
   EPLPlayButton.addEventListener('click', async (e) => {
     await playPlaylist(e);
     playMusic();
-    track.audio.play();
   });
   EPLDeleteButton.addEventListener('click', deletePlaylist);
   EPLEditButton.addEventListener('click', editPlaylist);
@@ -570,7 +560,6 @@ track.audio.addEventListener('ended', async () => {
   await nextTrack();
   if (track.audio.classList.contains('playing')) {
     playMusic();
-    track.audio.play();
   }
 });
 
@@ -579,7 +568,6 @@ playButton.addEventListener('click', (e) => {
     pauseMusic();
   } else {
     playMusic();
-    track.audio.play();
   }
 });
 
@@ -587,14 +575,12 @@ nextButton.addEventListener('click', async (e) => {
   await nextTrack();
   if (track.audio.classList.contains('playing')) {
     playMusic();
-    track.audio.play();
   }
 });
 
 prevButton.addEventListener('click', async (e) => {
   await prevTrack();
   playMusic();
-  track.audio.play();
 });
 
 repeatButton.addEventListener('click', (e) => {
@@ -638,7 +624,6 @@ progressBar.onchange = function (event) {
   track.audio.currentTime = Math.floor(track.audio.duration * percent);
 
   playMusic();
-  track.audio.play();
 };
 
 searchBar[0].addEventListener('focus', async (event) => {
